@@ -27,14 +27,19 @@ export function Popover({ target, anchor, original, busy, error, initialAuthor, 
 
   const selector = useMemo(() => cssSelector(target.el), [target]);
 
-  // Placement: below the anchor, else above, else pinned above the toolbar.
-  const vw = window.innerWidth, vh = window.innerHeight, H = 400;
-  const left = Math.max(12, Math.min(anchor.left, vw - Math.min(W, vw - 24) - 12));
+  // Placement: below the anchor, else above, else beside it (never on top of the target), else pinned above the toolbar.
+  const vw = window.innerWidth, vh = window.innerHeight, H = 500;
+  const w = Math.min(W, vw - 24);
+  let left = Math.max(12, Math.min(anchor.left, vw - w - 12));
+  const style: Record<string, string> = { width: `${w}px`, pointerEvents: "auto" };
   const below = anchor.top + anchor.height + 12;
-  const style: Record<string, string> = { left: `${left}px`, width: `min(${W}px, calc(100vw - 24px))`, pointerEvents: "auto" };
+  const sideTop = `${Math.max(12, Math.min(anchor.top, vh - H - 84))}px`;
   if (below + H < vh) style.top = `${Math.max(12, below)}px`;
   else if (anchor.top - 12 - H > 0) style.bottom = `${vh - anchor.top + 12}px`;
+  else if (anchor.left + anchor.width + 12 + w <= vw - 12) { left = anchor.left + anchor.width + 12; style.top = sideTop; }
+  else if (anchor.left - 12 - w >= 12) { left = anchor.left - 12 - w; style.top = sideTop; }
   else style.bottom = "84px";
+  style.left = `${left}px`;
 
   const submit = () => { if (comment.trim() && !busy) onSubmit({ comment: comment.trim(), type, priority, author: author.trim() }); };
   const preview = target.mode === "text" ? target.selectedText || "" : original.text;
