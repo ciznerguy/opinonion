@@ -24,11 +24,13 @@ export async function captureScreenshot(host: Element, focus: Box, outlines: Box
   const full = await Promise.race([work, new Promise<null>((r) => setTimeout(() => r(null), 12000))]);
   if (!full) return null;
 
-  // Crop: small targets get context padding; huge targets simply use the whole viewport.
+  // Crop: padding around the target, but never smaller than ~640x320 so small targets keep context.
   const pad = 56;
-  const cx = Math.max(0, focus.left - pad), cy = Math.max(0, focus.top - pad);
-  const cw = Math.min(vw - cx, focus.width + pad * 2), ch = Math.min(vh - cy, focus.height + pad * 2);
-  const useFull = cw * ch > vw * vh * 0.6 || cw < 120 || ch < 80;
+  const cw = Math.min(vw, Math.max(focus.width + pad * 2, 640));
+  const ch = Math.min(vh, Math.max(focus.height + pad * 2, 320));
+  const cx = Math.max(0, Math.min(vw - cw, focus.left + focus.width / 2 - cw / 2));
+  const cy = Math.max(0, Math.min(vh - ch, focus.top + focus.height / 2 - ch / 2));
+  const useFull = cw * ch > vw * vh * 0.6;
   const sx = useFull ? 0 : cx, sy = useFull ? 0 : cy, sw = useFull ? vw : cw, sh = useFull ? vh : ch;
 
   const k = Math.min(1, MAX_W / (sw * scale));

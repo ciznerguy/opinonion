@@ -20,6 +20,7 @@ export interface FeedbackPayload {
   viewport: { width: number; height: number; device: string };
   selector: string; xpath: string; tag: string;
   originalText: string; originalSrc: string;
+  heading: string; before: string; after: string; scrollPct: number;
   userAgent: string;
   screenshot: string | null;
 }

@@ -34,6 +34,10 @@ function parse(raw: any): Feedback | null {
     tag: str(raw.tag, 40),
     originalText: str(raw.originalText, 4000),
     originalSrc: str(raw.originalSrc, 2000),
+    heading: str(raw.heading, 200),
+    before: str(raw.before, 300),
+    after: str(raw.after, 300),
+    scrollPct: Math.max(0, Math.min(100, Math.round(Number(raw.scrollPct) || 0))),
     userAgent: str(raw.userAgent, 400),
     screenshot: m ? { mime: `image/${m[1]}`, base64: m[2] } : null,
   };

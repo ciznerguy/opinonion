@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { ApiError, getConfig, loadToken, saveToken, sendFeedback, setActiveFlag } from "../lib/api";
-import { describeOriginal, deviceOf, labelOf, rectsOf, union, cssSelector, xPath } from "../lib/dom";
+import { describeOriginal, deviceOf, labelOf, locateContext, rectsOf, union, cssSelector, xPath } from "../lib/dom";
 import type { Box, FeedbackPayload, Mode, Target } from "../lib/types";
 import { AuthModal } from "./AuthModal";
 import { Overlay } from "./Overlay";
@@ -145,6 +145,7 @@ export function App({ host }: { host: HTMLElement }) {
       selector: cssSelector(target.el), xpath: xPath(target.el), tag: target.el.localName,
       originalText: target.mode === "text" ? target.selectedText || "" : orig.text,
       originalSrc: orig.src,
+      ...locateContext(target),
       userAgent: navigator.userAgent,
       screenshot,
     };

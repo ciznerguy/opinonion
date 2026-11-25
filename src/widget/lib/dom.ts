@@ -89,3 +89,31 @@ export function labelOf(el: Element): string {
     : "";
   return `${tagOf(el)}${el.id ? "#" + el.id : ""}${cls}`.slice(0, 48);
 }
+
+/** Where on the page the target is: nearest heading, surrounding text, vertical position. */
+export function locateContext(t: Target): { heading: string; before: string; after: string; scrollPct: number } {
+  const el = t.el;
+  let heading = "";
+  for (const h of Array.from(document.querySelectorAll("h1,h2,h3,h4,h5,h6"))) {
+    if (h === el || h.contains(el) || h.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) {
+      heading = collapse(h.textContent ?? "").slice(0, 120);
+    } else break;
+  }
+
+  let before = "", after = "";
+  if (t.mode === "text" && t.selectedText) {
+    let block: Element | null = el;
+    while (block && block.parentElement && getComputedStyle(block).display.startsWith("inline")) block = block.parentElement;
+    const text = collapse((block as HTMLElement | null)?.innerText ?? "");
+    const sel = collapse(t.selectedText);
+    const i = text.indexOf(sel);
+    if (i >= 0) {
+      before = text.slice(Math.max(0, i - 120), i);
+      after = text.slice(i + sel.length, i + sel.length + 120);
+    }
+  }
+
+  const top = el.getBoundingClientRect().top + window.scrollY;
+  const total = Math.max(1, document.documentElement.scrollHeight);
+  return { heading, before, after, scrollPct: Math.max(0, Math.min(100, Math.round((top / total) * 100))) };
+}
