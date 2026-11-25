@@ -5,6 +5,7 @@ import type { Box, FeedbackPayload, Mode, Target } from "../lib/types";
 import { AuthModal } from "./AuthModal";
 import { Overlay } from "./Overlay";
 import { Popover, type FormValues } from "./Popover";
+import { SuccessCard } from "./SuccessCard";
 import { Toolbar } from "./Toolbar";
 
 const cfg = getConfig();
@@ -153,7 +154,7 @@ export function App({ host }: { host: HTMLElement }) {
       await sendFeedback(cfg, token, payload);
       if (v.author) store.set("opinonion:author", v.author);
       setTarget(null);
-      setToast({ ok: true, msg: screenshot ? "Feedback sent ✓" : "Feedback sent (without screenshot)" });
+      setToast({ ok: true, msg: screenshot ? "The team received your comment and a screenshot." : "The team received your comment (screenshot unavailable)." });
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
         saveToken(null); setToken(null); reset();
@@ -163,7 +164,7 @@ export function App({ host }: { host: HTMLElement }) {
 
   useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(() => setToast(null), 3200);
+    const t = setTimeout(() => setToast(null), 4000);
     return () => clearTimeout(t);
   }, [toast]);
 
@@ -189,9 +190,9 @@ export function App({ host }: { host: HTMLElement }) {
             />
           )}
           <Toolbar mode={mode} dark={dark} onMode={(m) => { setMode(m); setTarget(null); setHover(null); }} onTheme={toggleTheme} onClose={() => { setOpen(false); reset(); }} onLogout={logout} />
-          {toast && (
-            <div class={`oo-glass animate-pop fixed bottom-[84px] left-1/2 -translate-x-1/2 rounded-xl px-4 py-2 text-sm font-medium ${toast.ok ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"}`} role="status">{toast.msg}</div>
-          )}
+          {toast && (toast.ok
+            ? <SuccessCard note={toast.msg} />
+            : <div class="oo-glass animate-pop fixed bottom-[84px] left-1/2 -translate-x-1/2 rounded-xl px-4 py-2 text-sm font-medium text-red-500" role="status">{toast.msg}</div>)}
         </>
       )}
     </div>
