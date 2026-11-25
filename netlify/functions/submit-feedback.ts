@@ -63,7 +63,10 @@ export default async (req: Request, _ctx: Context) => {
     await sendMail(tenant, buildEmail(fb, tenant.siteName));
   } catch (err) {
     console.error("Mail send failed:", err);
-    return json(req, { error: "Could not send email" }, 502);
+    // Short, non-sensitive diagnostic code (e.g. EAUTH = bad Gmail credentials). Only reachable after login.
+    const e = err as { code?: string; responseCode?: number };
+    const code = [e?.code, e?.responseCode].filter(Boolean).join(" ");
+    return json(req, { error: `Could not send email${code ? ` (${code})` : ""}` }, 502);
   }
   return json(req, { ok: true });
 };
